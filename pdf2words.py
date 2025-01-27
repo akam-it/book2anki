@@ -15,8 +15,8 @@ from deep_translator import GoogleTranslator
 
 
 # Path to the PDF file
-PDF_FILE = "Geronimo Stilton Spacemice - Book 2 - You’re Mine, Captain!.pdf"
-PAGES_RANGES = [range(9, 122)]
+PDF_FILE = "Geronimo Stilton Spacemice - Book 3 - Ice Planet Adventure.pdf"
+PAGES_RANGES = [range(16, 242)]
 
 # File paths
 KNOWN_WORDS_FILE = ".KNOWN_WORDS.txt"
@@ -81,8 +81,8 @@ def extract_text_with_pytesseract(pdf_file):
 
 def extract_text(pdf_file):
     """Extract text from a PDF file or read from cache."""
-    pdf_file = os.path.splitext(os.path.basename(pdf_file))[0]
-    cache_file = f"{pdf_file}.txt"
+    base_filename = os.path.splitext(os.path.basename(pdf_file))[0]
+    cache_file = f"{base_filename}.txt"
     cached_text = read_cached_text(cache_file)
     if cached_text:
         print("Using cached text file.")
@@ -107,8 +107,8 @@ def clean_word(word):
 
 def is_valid_word(word):
     number_words = {
-        "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", 
-        "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", 
+        "zero", "one", "two", "three", "four", "five", "six", "seven", "eight",
+        "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen",
         "sixteen", "seventeen", "eighteen", "nineteen", "twenty"
     }
     """Check if a word meets the criteria for a valid English word."""
