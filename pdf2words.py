@@ -9,6 +9,7 @@ import curses
 import pytesseract
 import numpy as np
 
+from pathlib import Path
 from pdf2image import convert_from_path
 from nltk.corpus import words
 from deep_translator import GoogleTranslator
@@ -85,7 +86,7 @@ def extract_text(pdf_file):
     cache_file = f"{base_filename}.txt"
     cached_text = read_cached_text(cache_file)
     if cached_text:
-        print("Using cached text file.")
+        print(f"Using cached text file {cache_file}.")
         return cached_text
     print("Extracting text from PDF...")
     text = extract_text_with_pytesseract(pdf_file)
@@ -142,11 +143,26 @@ def extract_unique_words(text):
 
 # Word Classification Functions
 def load_known_words(file_path):
+    known_words = set()
     """Load known words from a file."""
     if os.path.exists(file_path):
         with open(file_path, "r") as file:
-            return set(line.strip() for line in file)
-    return set()
+            known_words.update(line.strip() for line in file)
+    return known_words
+
+
+def load_otherbook_words(file_path):
+    otherbook_words = set()
+    # Check other `.words` files in the current directory
+    for other_file in Path(".").glob("*.words"):
+        if other_file.name != Path(file_path).name:  # Avoid reloading the same file
+            with open(other_file, "r") as file:
+                lines = file.readlines()
+                line_count = len(lines)  # Count the number of lines
+                print(f"Found {line_count} words from other file: {other_file.name}")
+                otherbook_words.update(line.strip() for line in lines)
+    print("\n")
+    return otherbook_words
 
 
 def save_known_words(file_path, known_words):
@@ -189,13 +205,21 @@ def save_unknown_words(file_path, unknown_words):
 
 def classify_words(wordlist, stdscr):
     """Classify words as known or unknown."""
+    curses.endwin()
     known_words = load_known_words(KNOWN_WORDS_FILE)
     unknown_words = load_unknown_words(UNKNOWN_WORDS_FILE)
+    otherbook_words = load_otherbook_words(UNKNOWN_WORDS_FILE)
+    input("Press Enter to continue")
+    curses.initscr()
 
     # remove already proccessed words
     newlist = {}
     for word in wordlist:
-        if word in known_words or word in unknown_words:
+        if (
+            word in known_words
+            or word in unknown_words
+            or word in otherbook_words
+        ):
             continue
         newlist[word] = wordlist[word]
 
